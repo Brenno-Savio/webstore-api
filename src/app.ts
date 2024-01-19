@@ -2,9 +2,9 @@ import dotenv from 'dotenv';
 import express from 'express';
 import { resolve } from 'path';
 
-import home from './routes/home';
-
 dotenv.config();
+
+import home from './routes/home';
 
 class App {
   app: express.Application;

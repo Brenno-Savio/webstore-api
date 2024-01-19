@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import { env } from '../../lib/env';
+import { env } from '../lib/env';
 require('dotenv').config();
 
 export const sequelize = new Sequelize({
