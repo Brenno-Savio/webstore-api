@@ -24,7 +24,7 @@ module.exports = {
         unique: true,
       },
       cep: {
-        type: Sequelize.NUMBER,
+        type: Sequelize.STRING,
         allowNull: false,
       },
       email: {
@@ -54,7 +54,7 @@ module.exports = {
     });
   },
 
-  async down(queryInterface, Sequelize) {
+  async down(queryInterface) {
     return await queryInterface.dropTable('users');
   },
 };

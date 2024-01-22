@@ -6,11 +6,10 @@ import getErrorMessage from '../lib/utils/getErrorMessage';
 import Users from '../models/Users';
 import userValidator from '../validators/user';
 
-class UsersController {
+class User {
   async store(req: CustomReq, res: Response): PromiseRes {
     try {
       const userInValidation = new UserClass(req.body);
-
       const { errors, body } = await userValidator(userInValidation);
 
       if (typeof body === 'undefined') {
@@ -27,20 +26,7 @@ class UsersController {
 
       return res.status(200).json({ id, name, lastname, email, cpf, cep });
     } catch (e: any) {
-      const err = e.errors.map((err: any) => err.message);
-
-      if (
-        err[0] === 'cpf must be unique' ||
-        err[0] === 'email must be unique'
-      ) {
-        return res.status(400).json({
-          errors: err,
-        });
-      }
-
-      return res.status(500).json({
-        errors: getErrorMessage('unknownError'),
-      });
+      return res.status(400).json({ error: 'oi, de novo' });
     }
   }
 
@@ -161,4 +147,4 @@ class UsersController {
   }
 }
 
-export default new UsersController();
+export default new User();

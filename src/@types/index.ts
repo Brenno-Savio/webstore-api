@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { Optional } from 'sequelize';
-import getErrorMessage from '../lib/utils/getErrorMessage';
+import DataClass from './DataClass';
 
 interface CepObjectError {
   message: string;
@@ -37,7 +37,7 @@ interface UserBody {
   admin: boolean;
 }
 
-type UserModelBody = UserBody & Optional<any, string>;
+export type UserModelBody = UserBody & Optional<any, string>;
 
 interface CepObjectInvalid {
   name: string;
@@ -46,36 +46,11 @@ interface CepObjectInvalid {
   errors: CepObjectError | CepObjectError[];
 }
 
-class DataClass {
-  public errors: string[] = [];
-
-  isNull(value: any, field: string): void {
-    if(typeof value === null) {
-      this.errors.push(getErrorMessage('empty', field));
-    }
-  }
-  whatType(value: any, type: string, field: string): void {
-    if(typeof value !== type) {
-      this.errors.push(getErrorMessage('type', field, type))
-    }
-  }
-  checkLength(value: string, min: number, max: number, field: string): void {
-    if(value.length > max || value.length < min) {
-      this.errors.push(getErrorMessage('length', field, String(min), String(max)))
-    }
-  }
-  validation(validator: any, value: string | number, field: string): void {
-    if(!validator(value)) {
-      this.errors.push(getErrorMessage('validation', field));
-    }
-  }
-}
-
 export interface ErrorList {
   unknown: string;
   empty: string;
   type: string;
-  lenght: string;
+  length: string;
   validation: string;
 }
 
@@ -86,7 +61,7 @@ export type CustomReq = Request & UserRequest;
 
 export class UserClass extends DataClass{
   body: UserModelBody;
-  constructor(body: UserModelBody, public errors: string[] = []) {
+  constructor(body: UserModelBody) {
     super();
     this.body = body;
   }

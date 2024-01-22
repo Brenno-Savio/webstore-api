@@ -10,7 +10,7 @@ class Users extends Model {
   declare name: string;
   declare lastname: string;
   declare cpf: string;
-  declare cep: string;
+  declare cep: number;
   declare email: string;
   declare password: string;
   declare password_hash: string;
@@ -81,7 +81,7 @@ Users.init(
       allowNull: false,
     },
     cep: {
-      type: DataTypes.NUMBER,
+      type: DataTypes.STRING,
       validate: {
         validateCep: async (userCep: string) => {
           const cepObject: CepObject = await cep(userCep);

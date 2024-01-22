@@ -1,52 +1,63 @@
 import cep from 'cep-promise';
 import { validate } from 'node-cpf';
 import isEmail from 'validator/lib/isEmail';
-import { CepObject, UserClass } from '../@types';
-import getErrorMessage from '../lib/utils/getErrorMessage';
+import { UserClass } from '../@types';
 import { notNumOrSym } from '../lib/utils/notNumOrSym';
 import passwordRegex from '../lib/utils/passwordRegex';
 
 export default async function userValidator(
   user: UserClass,
 ): Promise<UserClass> {
-  //name
-  user.isNull(user.body.name, 'name');
-  user.whatType(user.body.name, 'string', 'name');
-  user.checkLength(user.body.name, 3, 20, 'name');
-  user.validation(notNumOrSym, user.body.name, 'name');
+  const validations: any[][] = [
+    ['null', user.body.name, 'name'],
+    ['type', user.body.name, 'string', 'name'],
+    ['length', user.body.name, 3, 20, 'name'],
+    ['validation', notNumOrSym, user.body.name, 'name'],
+    ['null', user.body.lastname, 'lastname'],
+    ['type', user.body.lastname, 'string', 'lastname'],
+    ['length', user.body.lastname, 3, 20, 'lastname'],
+    ['validation', notNumOrSym, user.body.lastname, 'lastname'],
+    ['null', user.body.cpf, 'CPF'],
+    ['type', user.body.cpf, 'string', 'CPF'],
+    ['validation', validate, user.body.cpf, 'CPF'],
+    ['null', user.body.cep, 'CEP'],
+    ['type', user.body.cep, 'string', 'CEP'],
+    ['validation', cep, user.body.cep, 'CEP'],
+    ['null', user.body.email, 'email'],
+    ['type', user.body.email, 'string', 'email'],
+    ['validation', isEmail, user.body.email, 'email'],
+    ['null', user.body.password, 'password'],
+    ['type', user.body.password, 'string', 'password'],
+    ['validation', passwordRegex, user.body.password, 'password'],
+    ['null', user.body.admin, 'admin'],
+    ['type', user.body.admin, 'boolean', 'admin'],
+  ];
 
-  //lastname
-  user.isNull(user.body.lastname, 'lastname');
-  user.whatType(user.body.lastname, 'string', 'lastname');
-  user.checkLength(user.body.lastname, 3, 20, 'lastname');
-  user.validation(notNumOrSym, user.body.lastname, 'lastname');
+  for (let i = 0; i < validations.length; i++) {
+    if (validations[i][0] === 'null') {
+      user.isNull(validations[i][1], validations[i][2] as string);
+    }
+    if (validations[i][0] === 'type') {
+      user.whatType(
+        validations[i][1],
+        String(validations[i][2]),
+        String(validations[i][3]),
+      );
+    }
+    if (validations[i][0] === 'length') {
+      user.checkLength(
+        String(validations[i][1]),
+        Number(validations[i][2]),
+        Number(validations[i][3]),
+        String(validations[i][4]),
+      );
+    }
+    if (validations[i][0] === 'validation') {
+      user.validation(validations[i][1], validations[i][2], validations[i][3]);
+    }
 
-  //cpf
-  user.isNull(user.body.cpf, 'CPF');
-  user.whatType(user.body.cpf, 'string', 'CPF');
-  user.validation(validate, user.body.cpf, 'CPF');
-
-  //cep
-  user.isNull(user.body.cep, 'CEP');
-  user.whatType(user.body.cep, 'number', 'CEP');
-  const cepObject: CepObject = await cep(user.body.cep);
-  if ('name' in cepObject && cepObject.name === 'CepPromiseError') {
-    user.errors.push(getErrorMessage('valiadation', 'CEP'));
+    if (user.errors.length > 0) return user;
   }
-
-  //email
-  user.isNull(user.body.email, 'email');
-  user.whatType(user.body.email, 'string', 'email');
-  user.validation(isEmail, user.body.email, 'email');
-
-  //password
-  user.isNull(user.body.password, 'password');
-  user.whatType(user.body.password, 'string', 'password');
-  user.validation(passwordRegex, user.body.password, 'password');
-
-  //admin
-  user.isNull(user.body.admin, 'admin');
-  user.whatType(user.body.admin, 'boolean', 'admin');
 
   return user;
 }

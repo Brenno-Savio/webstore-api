@@ -5,6 +5,7 @@ import { resolve } from 'path';
 dotenv.config();
 
 import home from './routes/home';
+import user from './routes/user';
 
 class App {
   app: express.Application;
@@ -22,6 +23,7 @@ class App {
 
   routes() {
     this.app.use('/', home);
+    this.app.use('/user/', user);
   }
 }
 
