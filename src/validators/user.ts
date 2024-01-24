@@ -1,13 +1,13 @@
 import cep from 'cep-promise';
 import { validate } from 'node-cpf';
 import isEmail from 'validator/lib/isEmail';
-import { UserClass } from '../@types';
+import { UserModel } from '../@types/Models';
 import { notNumOrSym } from '../lib/utils/notNumOrSym';
 import passwordRegex from '../lib/utils/passwordRegex';
 
 export default async function userValidator(
-  user: UserClass,
-): Promise<UserClass> {
+  user: UserModel,
+): Promise<UserModel> {
   const validations: any[][] = [
     ['null', user.body.name, 'name'],
     ['type', user.body.name, 'string', 'name'],
@@ -22,7 +22,9 @@ export default async function userValidator(
     ['null', user.body.cpf, 'CPF'],
     ['type', user.body.cpf, 'string', 'CPF'],
     ['validation', validate, user.body.cpf, 'CPF'],
+    ['mask', user.body.cpf],
     ['null', user.body.cep, 'CEP'],
+    ['length', user.body.cep, 8, 8, 'CEP'],
     ['type', user.body.cep, 'string', 'CEP'],
     ['validation', cep, user.body.cep, 'CEP'],
     ['null', user.body.email, 'email'],
@@ -56,6 +58,10 @@ export default async function userValidator(
 
     if (validations[i][0] === 'corrector') {
       user.nameCorrector(validations[i][1], validations[i][2]);
+    }
+
+    if (validations[i][0] === 'mask') {
+      user.cpfCorrector(validations[i][1]);
     }
 
     if (user.errors.length > 0) return user;

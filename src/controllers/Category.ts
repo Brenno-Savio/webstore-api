@@ -1,17 +1,17 @@
 import { Response } from 'express';
 import { FindOptions, OrderItem, WhereOptions } from 'sequelize';
 import { CustomReq, PromiseRes } from '../@types';
-import { UserModel } from '../@types/Models';
+import { CategoryModel } from '../@types/Models';
 import filterSystem from '../lib/utils/filterSystem';
 import getErrorMessage from '../lib/utils/getErrorMessage';
-import Users from '../models/Users';
-import userValidator from '../validators/user';
+import Categories from '../models/Categories';
+import categoryValidator from '../validators/category';
 
-class User {
+class Category {
   async store(req: CustomReq, res: Response): PromiseRes {
     try {
-      const userInValidation = new UserModel(req.body);
-      const { errors, body } = await userValidator(userInValidation);
+      const categoryInValidation = new CategoryModel(req.body);
+      const { errors, body } = await categoryValidator(categoryInValidation);
 
       if (typeof body === 'undefined') {
         return res.status(500).json({
@@ -23,9 +23,9 @@ class User {
         return res.status(400).json(errors);
       }
 
-      const { id, name, lastname, email, cpf, cep } = await Users.create(body);
+      const newCategory = await Categories.create(body);
 
-      return res.status(200).json({ id, name, lastname, email, cpf, cep });
+      return res.status(200).json({ newCategory });
     } catch (e: any) {
       return res.status(500).json({
         errors: getErrorMessage('unknown'),
@@ -37,7 +37,7 @@ class User {
     const { filter, sort, limit, offset } = req.query;
 
     const paramQuery: FindOptions = {
-      attributes: ['id', 'name', 'lastname', 'email', 'cpf', 'cep', 'admin'],
+      attributes: ['id', 'name', 'created_at', 'updated_at'],
     };
 
     if (typeof filter !== 'undefined' && filter !== '') {
@@ -62,8 +62,8 @@ class User {
     }
 
     try {
-      const users = await Users.findAll(paramQuery);
-      return res.json(users);
+      const categories = await Categories.findAll(paramQuery);
+      return res.json(categories);
     } catch (e: any) {
       return res.status(500).json({
         errors: getErrorMessage('unknown'),
@@ -73,12 +73,10 @@ class User {
 
   async show(req: CustomReq, res: Response): PromiseRes {
     try {
-      const User = await Users.findByPk(req.params.id, {
-        attributes: ['id', 'name', 'lastname', 'email', 'cpf', 'cep', 'admin'],
-      });
-      return res.json(User);
+      const category = await Categories.findByPk(req.params.id);
+      return res.json(category);
     } catch (e) {
-      return res.status(404).json({ errors: ['User not found'] });
+      return res.status(404).json({ errors: ['Category not found'] });
     }
   }
 
@@ -89,37 +87,14 @@ class User {
           errors: ['ID not sent'],
         });
       }
-
-      const userInValidation = new UserModel(req.body);
-      const { errors, body } = await userValidator(userInValidation);
-
-      const user = await Users.findByPk(req.params.id);
-
-      if (!user) {
+      const category = await Categories.findByPk(req.params.id);
+      if (!category) {
         return res.status(404).json({
-          errors: ['user not found'],
+          errors: ['category not found'],
         });
       }
-
-      if ((!user.admin && req.body.admin) || (user.admin && !req.body.admin)) {
-        return res.status(401).json({
-          errors: ['You cannot change your admin status'],
-        });
-      }
-
-      if (typeof body === 'undefined') {
-        return res.status(500).json({
-          errors: getErrorMessage('unknown'),
-        });
-      }
-
-      if (errors.length > 0) {
-        return res.status(400).json(errors);
-      }
-
-      const { id, email, name, lastname, cep, cpf, admin } =
-        await user.update(body);
-      return res.json({ id, email, name, lastname, cep, cpf, admin });
+      const newData = await category.update(req.body);
+      return res.json({ newData });
     } catch (e: any) {
       return res.status(500).json({
         errors: getErrorMessage('unknown'),
@@ -134,14 +109,14 @@ class User {
           errors: ['ID not sent'],
         });
       }
-      const user = await Users.findByPk(req.params.id);
-      if (!user) {
-        return res.status(404).json({
-          errors: ['User not found'],
+      const category = await Categories.findByPk(req.params.id);
+      if (!category) {
+        return res.status(400).json({
+          errors: ['category not found'],
         });
       }
-      await user.destroy();
-      return res.json(`This user was deleted successfully`);
+      await category.destroy();
+      return res.json(`this category was deleted successfully`);
     } catch (e: any) {
       return res.status(500).json({
         errors: getErrorMessage('unknown'),
@@ -150,4 +125,4 @@ class User {
   }
 }
 
-export default new User();
+export default new Category();

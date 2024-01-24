@@ -1,6 +1,5 @@
 import { Request, Response } from 'express';
 import { Optional } from 'sequelize';
-import DataClass from './DataClass';
 
 interface CepObjectError {
   message: string;
@@ -37,7 +36,21 @@ interface UserBody {
   admin: boolean;
 }
 
+interface CategoryBody {
+  name: string;
+}
+
+interface ProductBody {
+  name: string;
+  price: number;
+  stock: number;
+  user_id: string;
+  category_id: string;
+}
+
 export type UserModelBody = UserBody & Optional<any, string>;
+export type CategoryModelBody = CategoryBody & Optional<any, string>;
+export type ProductModelBody = ProductBody & Optional<any, string>;
 
 interface CepObjectInvalid {
   name: string;
@@ -52,36 +65,9 @@ export interface ErrorList {
   type: string;
   length: string;
   validation: string;
+  insufficient: string;
 }
 
 export type CepObject = CepObjectValid | CepObjectInvalid;
 export type PromiseRes = Promise<Response<any, Record<string, any>>>;
 export type CustomReq = Request & UserRequest;
-
-export class UserClass extends DataClass {
-  body: UserModelBody;
-  constructor(body: UserModelBody) {
-    super();
-    this.body = body;
-  }
-
-  nameCorrector(value: string, field: string): void {
-    let newValue;
-
-    if (/\s/.test(value)) {
-      const compostName = value.toLowerCase().split(' ');
-      let [firstName, secondName] = compostName;
-      firstName = firstName.replace(firstName[0], firstName[0].toUpperCase());
-      secondName = secondName.replace(
-        secondName[0],
-        secondName[0].toUpperCase(),
-      );
-
-      newValue = `${firstName} ${secondName}`;
-    } else {
-      let lowername = value.toLowerCase();
-      newValue = lowername.replace(lowername[0], lowername[0].toUpperCase());
-    }
-    this.body[field] = newValue;
-  }
-}
