@@ -4,7 +4,11 @@ import { resolve } from 'path';
 
 dotenv.config();
 
+import category from './routes/category';
 import home from './routes/home';
+import picture from './routes/picture';
+import product from './routes/product';
+import token from './routes/token';
 import user from './routes/user';
 
 class App {
@@ -24,6 +28,10 @@ class App {
   routes() {
     this.app.use('/', home);
     this.app.use('/user/', user);
+    this.app.use('/token/', token);
+    this.app.use('/category/', category);
+    this.app.use('/product/', product);
+    this.app.use('/picture/', picture);
   }
 }
 

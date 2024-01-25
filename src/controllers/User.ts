@@ -134,6 +134,11 @@ class User {
           errors: ['ID not sent'],
         });
       }
+      if (req.params.id !== String(req.userId)) {
+        return res.status(401).json({
+          errors: ['You can only delete your own account'],
+        });
+      }
       const user = await Users.findByPk(req.params.id);
       if (!user) {
         return res.status(404).json({
